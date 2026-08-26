@@ -1,0 +1,6 @@
+{
+  "name": "기능사 D-DAY 마스터",
+  "description": "국가기술자격 기능사 시험 D-Day 카운트다운, CBT 실전 모의고사, 과목별 학습 체크리스트 및 큐넷 시험일정 통합 관리",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
