@@ -13,7 +13,6 @@ export type ExamType = 'written' | 'practical'; // 필기 vs 실기
 export interface ExamInfo {
   id: string;
   name: string;
-  category: ExamCategory;
   agency: string; // 한국산업인력공단(Q-Net)
   passingScore: number; // 보통 60점
   totalQuestions: number; // 60문항
@@ -22,7 +21,6 @@ export interface ExamInfo {
   practicalTargetDate: string; // YYYY-MM-DD
   testLocation?: string;
   testTime?: string;
-  targetScore?: number;
   subjects: string[];
   tips?: string[];
   isCustom?: boolean;
