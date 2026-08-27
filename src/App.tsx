@@ -18,7 +18,8 @@ import {
   INITIAL_EXAMS, 
   QNET_SCHEDULES, 
   INITIAL_SUMMARY_NOTES, 
-  MOCK_QUESTIONS_MAP 
+  MOCK_QUESTIONS_MAP,
+  generateDefaultMockQuestions
 } from './data/examsData';
 import { 
   ExamInfo, 
@@ -43,7 +44,8 @@ import {
   Zap,
   HelpCircle,
   BarChart3,
-  ExternalLink
+  ExternalLink,
+  X
 } from 'lucide-react';
 
 const INITIAL_TASKS: StudyTask[] = [
@@ -75,6 +77,14 @@ export default function App() {
   const [exams, setExams] = useState<ExamInfo[]>(() => {
     const saved = localStorage.getItem('certification_master_exams');
     return saved ? JSON.parse(saved) : INITIAL_EXAMS;
+  });
+
+  // Questions Map State (for dynamic question generation)
+  const [questionsMap, setQuestionsMap] = useState<Record<string, CBTQuestion[]>>(() => {
+    const saved = localStorage.getItem('certification_master_questions');
+    if (saved) return JSON.parse(saved);
+    // Initialize with existing questions from examsData
+    return MOCK_QUESTIONS_MAP;
   });
 
   const [selectedExamId, setSelectedExamId] = useState<string>(() => {
@@ -119,6 +129,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('certification_master_exams', JSON.stringify(exams));
   }, [exams]);
+
+  useEffect(() => {
+    localStorage.setItem('certification_master_questions', JSON.stringify(questionsMap));
+  }, [questionsMap]);
 
   useEffect(() => {
     localStorage.setItem('certification_master_selected_id', selectedExamId);
@@ -206,6 +220,8 @@ export default function App() {
 
   // Exam Save / Edit Handler
   const handleSaveExam = (updatedExam: ExamInfo) => {
+    const isNewExam = !exams.some((e) => e.id === updatedExam.id);
+    
     setExams((prev) => {
       const exists = prev.some((e) => e.id === updatedExam.id);
       if (exists) {
@@ -214,7 +230,28 @@ export default function App() {
         return [updatedExam, ...prev];
       }
     });
+    
+    // Auto-generate questions for new exams if not already in questionsMap
+    if (isNewExam && !questionsMap[updatedExam.id]) {
+      const generatedQuestions = generateDefaultMockQuestions(updatedExam);
+      setQuestionsMap((prev) => ({
+        ...prev,
+        [updatedExam.id]: generatedQuestions,
+      }));
+    }
+    
     setSelectedExamId(updatedExam.id);
+  };
+
+  // Exam Delete Handler
+  const handleDeleteExam = (examId: string) => {
+    const remaining = exams.filter((e) => e.id !== examId);
+    setExams(remaining);
+    
+    // If deleted exam was selected, switch to first available
+    if (selectedExamId === examId && remaining.length > 0) {
+      setSelectedExamId(remaining[0].id);
+    }
   };
 
   // Schedule Sync Handler
@@ -266,17 +303,33 @@ export default function App() {
             빠른 전환:
           </span>
           {exams.map((exam) => (
-            <button
-              key={exam.id}
-              onClick={() => setSelectedExamId(exam.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${
-                exam.id === selectedExam.id
-                  ? 'bg-[#1e40af] text-white border-transparent shadow-xs'
-                  : 'bg-white text-[#444653] border-[#e0e3e5] hover:bg-[#f2f4f6]'
-              }`}
-            >
-              <span>{exam.name}</span>
-            </button>
+            <div key={exam.id} className="relative group">
+              <button
+                onClick={() => setSelectedExamId(exam.id)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${
+                  exam.id === selectedExam.id
+                    ? 'bg-[#1e40af] text-white border-transparent shadow-xs'
+                    : 'bg-white text-[#444653] border-[#e0e3e5] hover:bg-[#f2f4f6]'
+                }`}
+              >
+                <span>{exam.name}</span>
+              </button>
+              {/* Delete Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteExam(exam.id);
+                }}
+                className={`absolute -top-2 -right-2 rounded-full p-1 transition-all opacity-0 group-hover:opacity-100 ${
+                  exam.id === selectedExam.id
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-[#f2f4f6] hover:bg-red-500 text-[#444653] hover:text-white'
+                }`}
+                title="자격증 삭제"
+              >
+                <X size={12} />
+              </button>
+            </div>
           ))}
           <button
             onClick={() => {
@@ -513,6 +566,7 @@ export default function App() {
         isOpen={isCBTModalOpen}
         onClose={() => setIsCBTModalOpen(false)}
         onSaveResult={handleSaveCBTResult}
+        questionsMap={questionsMap}
       />
 
       <QNetScheduleModal
@@ -536,6 +590,7 @@ export default function App() {
         }}
         initialExam={editingExam}
         onSaveExam={handleSaveExam}
+        allExams={exams}
       />
 
       {/* Footer */}

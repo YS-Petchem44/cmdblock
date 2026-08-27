@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Logo } from './Logo';
 import { ExamInfo } from '../types';
-import { Calendar, Plus, BookOpen, Clock, Award, ChevronDown } from 'lucide-react';
+import { Calendar, Plus, BookOpen, Clock, Award, ChevronDown, Search, X } from 'lucide-react';
 
 interface HeaderProps {
   exams: ExamInfo[];
@@ -26,6 +26,13 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter exams based on search query
+  const filteredExams = exams.filter(exam =>
+    exam.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#eceef0] shadow-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -54,23 +61,52 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="px-3 py-1.5 text-[11px] font-bold text-[#757684] uppercase tracking-wider">
                 나의 목표 자격증 선택
               </div>
+              
+              {/* Search Input */}
+              <div className="px-3 pb-2">
+                <div className="relative">
+                  <Search size={14} className="absolute left-2.5 top-2.5 text-[#757684]" />
+                  <input
+                    type="text"
+                    placeholder="자격증 검색..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-7 pr-2 py-1.5 text-xs border border-[#e0e3e5] rounded-lg bg-[#f7f9fb] focus:outline-none focus:ring-1 focus:ring-[#1e40af] focus:border-[#1e40af]"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-2 text-[#757684] hover:text-[#191c1e]"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="max-h-60 overflow-y-auto">
-                {exams.map((exam) => (
-                  <button
-                    key={exam.id}
-                    onClick={() => onSelectExam(exam)}
-                    className={`w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-[#f2f4f6] transition-colors ${
-                      selectedExam.id === exam.id
-                        ? 'text-[#1e40af] font-bold bg-[#dde1ff]/40'
-                        : 'text-[#191c1e]'
-                    }`}
-                  >
-                    <span>{exam.name}</span>
-                    <span className="text-[11px] text-[#757684] bg-white px-2 py-0.5 rounded-md border border-[#e0e3e5]">
-                      {exam.category}
-                    </span>
-                  </button>
-                ))}
+                {filteredExams.length > 0 ? (
+                  filteredExams.map((exam) => (
+                    <button
+                      key={exam.id}
+                      onClick={() => {
+                        onSelectExam(exam);
+                        setSearchQuery('');
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-[#f2f4f6] transition-colors ${
+                        selectedExam.id === exam.id
+                          ? 'text-[#1e40af] font-bold bg-[#dde1ff]/40'
+                          : 'text-[#191c1e]'
+                      }`}
+                    >
+                      <span>{exam.name}</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-3.5 py-3 text-center text-xs text-[#757684]">
+                    검색 결과가 없습니다
+                  </div>
+                )}
               </div>
               <div className="border-t border-[#eceef0] mt-1 pt-1 px-2">
                 <button

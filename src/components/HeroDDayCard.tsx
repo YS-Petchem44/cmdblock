@@ -63,12 +63,9 @@ export const HeroDDayCard: React.FC<HeroDDayCardProps> = ({
       <div className="h-2.5 bg-gradient-to-r from-[#00288e] via-[#1e40af] to-[#64a8fe]" />
 
       <div className="p-6 sm:p-8">
-        {/* Top bar: Category Badge + Type Switcher (필기 / 실기) + Edit button */}
+        {/* Top bar: Type Switcher (필기 / 실기) + Edit button */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2">
-            <span className="bg-[#dde1ff] text-[#001453] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              {exam.category}
-            </span>
             <span className="text-xs font-medium text-[#757684]">
               {exam.agency}
             </span>
@@ -183,14 +180,14 @@ export const HeroDDayCard: React.FC<HeroDDayCardProps> = ({
                 </div>
               </div>
 
-              {/* Target Score Box */}
+              {/* Passing Score Box */}
               <div className="bg-[#f8fafc] p-3.5 rounded-2xl border border-[#eceef0]">
                 <div className="flex items-center gap-1.5 text-[#757684] text-xs font-semibold mb-1">
                   <Award size={14} className="text-[#1e40af]" />
-                  <span>목표 / 합격선</span>
+                  <span>합격선</span>
                 </div>
-                <div className="text-sm sm:text-base font-bold text-[#191c1e]">
-                  <span className="text-[#1e40af]">{exam.targetScore || 80}점</span> / {exam.passingScore}점
+                <div className="text-sm sm:text-base font-bold text-[#1e40af]">
+                  {exam.passingScore}점 이상
                 </div>
               </div>
 

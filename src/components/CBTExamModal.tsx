@@ -13,6 +13,7 @@ interface CBTExamModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaveResult: (result: CBTExamResult, questions: CBTQuestion[]) => void;
+  questionsMap?: Record<string, CBTQuestion[]>;
 }
 
 export const CBTExamModal: React.FC<CBTExamModalProps> = ({
@@ -20,6 +21,7 @@ export const CBTExamModal: React.FC<CBTExamModalProps> = ({
   isOpen,
   onClose,
   onSaveResult,
+  questionsMap = MOCK_QUESTIONS_MAP,
 }) => {
   // Load questions for selected exam or default
   const [questions, setQuestions] = useState<CBTQuestion[]>([]);
@@ -36,7 +38,7 @@ export const CBTExamModal: React.FC<CBTExamModalProps> = ({
   // Initialize or reset exam
   useEffect(() => {
     if (isOpen) {
-      const baseQuestions = MOCK_QUESTIONS_MAP[exam.id] || MOCK_QUESTIONS_MAP['info-processing'] || [];
+      const baseQuestions = questionsMap[exam.id] || questionsMap['info-processing'] || [];
       
       // If questions are fewer than 20, duplicate/re-index to simulate a realistic CBT test
       let fullQuestionSet: CBTQuestion[] = [];
